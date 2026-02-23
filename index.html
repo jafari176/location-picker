@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Location Picker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Places API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0pL37G9uayPSvELKkM8mNylAREgfzX_w&libraries=places"></script>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -16,94 +15,94 @@
     .container {
       background: white;
       padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 320px;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 350px;
     }
 
     input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin-bottom: 15px;
-      border-radius: 4px;
+      border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 14px;
     }
 
     button {
       width: 100%;
-      padding: 10px;
-      background: #25D366;
-      color: white;
+      padding: 12px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 15px;
-      cursor: pointer;
-      display: none;
+      cursor: not-allowed;
+      background: #ccc;
+      color: white;
     }
 
-    button:hover {
-      background: #1ebe5d;
+    button.active {
+      background: #25D366;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Book Your Ride</h2>
+  <h2>Book Ride</h2>
 
-  <input type="text" id="pickup" placeholder="Pickup Address" />
-  <input type="text" id="destination" placeholder="Destination Address" />
+  <input id="pickup" placeholder="Pickup location">
+  <input id="destination" placeholder="Destination location">
 
-  <button id="submitBtn">Submit</button>
+  <button id="submitBtn" disabled>Submit</button>
 </div>
 
 <script>
-  const pickupInput = document.getElementById("pickup");
-  const destinationInput = document.getElementById("destination");
-  const submitBtn = document.getElementById("submitBtn");
+const pickup = document.getElementById("pickup");
+const destination = document.getElementById("destination");
+const submitBtn = document.getElementById("submitBtn");
 
-  // Show button only when both fields have value
-  function checkInputs() {
-    if (pickupInput.value.trim() !== "" && destinationInput.value.trim() !== "") {
-      submitBtn.style.display = "block";
-    } else {
-      submitBtn.style.display = "none";
-    }
+let pickupSelected = false;
+let destSelected = false;
+
+function enableButton() {
+  if (pickupSelected && destSelected) {
+    submitBtn.disabled = false;
+    submitBtn.classList.add("active");
   }
+}
 
-  pickupInput.addEventListener("input", checkInputs);
-  destinationInput.addEventListener("input", checkInputs);
+function initAutocomplete() {
+  const pickupAuto = new google.maps.places.Autocomplete(pickup);
+  const destAuto = new google.maps.places.Autocomplete(destination);
 
-  submitBtn.addEventListener("click", async () => {
-    const pickup = pickupInput.value.trim();
-    const destination = destinationInput.value.trim();
-
-    try {
-      await fetch("/api/webhook", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          pickup,
-          destination
-        })
-      });
-
-      // Redirect to WhatsApp after submission
-      window.location.href = "https://wa.me/447888873795";
-
-    } catch (error) {
-      alert("Something went wrong. Please try again.");
-      console.error(error);
-    }
+  pickupAuto.addListener("place_changed", () => {
+    pickupSelected = true;
+    enableButton();
   });
+
+  destAuto.addListener("place_changed", () => {
+    destSelected = true;
+    enableButton();
+  });
+}
+
+submitBtn.onclick = async () => {
+  if (submitBtn.disabled) return;
+
+  await fetch("/api/webhook", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      pickup: pickup.value,
+      destination: destination.value
+    })
+  });
+
+  window.location.href = "https://wa.me/447888873795";
+};
+
+initAutocomplete();
 </script>
 
 </body>
