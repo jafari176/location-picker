@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Select Location</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0pL37G9uayPSvELKkM8mNylAREgfzX_w&libraries=places"></script>
+</head>
+
+<body>
+<h2>Select Pickup Location</h2>
+
+<input id="autocomplete" placeholder="Enter address"
+       style="width:300px;height:40px"/>
+
+<br><br>
+<button onclick="sendLocation()">Confirm Location</button>
+
+<script>
+let selectedPlace = null;
+
+const input = document.getElementById("autocomplete");
+const autocomplete = new google.maps.places.Autocomplete(input);
+
+autocomplete.addListener("place_changed", function() {
+  selectedPlace = autocomplete.getPlace();
+});
+
+function sendLocation() {
+  if (!selectedPlace) {
+    alert("Please select location first");
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const user = params.get("user");
+
+  fetch("https://krunaln8n.work.gd/webhook/a592e680-bcf6-4d41-9fa3-75bcee559abd", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      user,
+      address: selectedPlace.formatted_address,
+      lat: selectedPlace.geometry.location.lat(),
+      lng: selectedPlace.geometry.location.lng()
+    })
+  });
+
+  alert("Location sent successfully!");
+}
+</script>
+
+</body>
+</html>
