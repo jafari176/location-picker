@@ -58,31 +58,45 @@
 </div>
 
 <script>
-const pickup = document.getElementById("pickup");
-const destination = document.getElementById("destination");
+const pickupInput = document.getElementById("pickup");
+const destInput = document.getElementById("destination");
 const submitBtn = document.getElementById("submitBtn");
 
-let pickupSelected = false;
-let destSelected = false;
+let pickupData = null;
+let destData = null;
 
 function enableButton() {
-  if (pickupSelected && destSelected) {
+  if (pickupData && destData) {
     submitBtn.disabled = false;
     submitBtn.classList.add("active");
   }
 }
 
 function initAutocomplete() {
-  const pickupAuto = new google.maps.places.Autocomplete(pickup);
-  const destAuto = new google.maps.places.Autocomplete(destination);
+  const pickupAuto = new google.maps.places.Autocomplete(pickupInput);
+  const destAuto = new google.maps.places.Autocomplete(destInput);
 
   pickupAuto.addListener("place_changed", () => {
-    pickupSelected = true;
+    const place = pickupAuto.getPlace();
+
+    pickupData = {
+      address: place.formatted_address,
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    };
+
     enableButton();
   });
 
   destAuto.addListener("place_changed", () => {
-    destSelected = true;
+    const place = destAuto.getPlace();
+
+    destData = {
+      address: place.formatted_address,
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    };
+
     enableButton();
   });
 }
@@ -92,14 +106,23 @@ submitBtn.onclick = async () => {
 
   await fetch("/api/webhook", {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      pickup: pickup.value,
-      destination: destination.value
-    })
+      pickup: pickupData,
+      destination: destData,
+    }),
   });
 
-  window.location.href = "https://wa.me/447888873795";
+  window.location.href =
+    "https://wa.me/447888873795?text=" +
+    encodeURIComponent(
+      "Pickup: " + pickupData.address +
+      "\nLat: " + pickupData.lat +
+      "\nLng: " + pickupData.lng +
+      "\n\nDestination: " + destData.address +
+      "\nLat: " + destData.lat +
+      "\nLng: " + destData.lng
+    );
 };
 
 initAutocomplete();
