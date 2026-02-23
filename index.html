@@ -1,51 +1,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Select Location</title>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0pL37G9uayPSvELKkM8mNylAREgfzX_w&libraries=places"></script>
+  <title>Location Picker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #25D366;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+      display: none;
+    }
+
+    button:hover {
+      background: #1ebe5d;
+    }
+  </style>
 </head>
-
 <body>
-<h2>Select Pickup Location</h2>
 
-<input id="autocomplete" placeholder="Enter address"
-       style="width:300px;height:40px"/>
+<div class="container">
+  <h2>Book Your Ride</h2>
 
-<br><br>
-<button onclick="sendLocation()">Confirm Location</button>
+  <input type="text" id="pickup" placeholder="Pickup Address" />
+  <input type="text" id="destination" placeholder="Destination Address" />
+
+  <button id="submitBtn">Submit</button>
+</div>
 
 <script>
-let selectedPlace = null;
+  const pickupInput = document.getElementById("pickup");
+  const destinationInput = document.getElementById("destination");
+  const submitBtn = document.getElementById("submitBtn");
 
-const input = document.getElementById("autocomplete");
-const autocomplete = new google.maps.places.Autocomplete(input);
-
-autocomplete.addListener("place_changed", function() {
-  selectedPlace = autocomplete.getPlace();
-});
-
-function sendLocation() {
-  if (!selectedPlace) {
-    alert("Please select location first");
-    return;
+  // Show button only when both fields have value
+  function checkInputs() {
+    if (pickupInput.value.trim() !== "" && destinationInput.value.trim() !== "") {
+      submitBtn.style.display = "block";
+    } else {
+      submitBtn.style.display = "none";
+    }
   }
 
-  const params = new URLSearchParams(window.location.search);
-  const user = params.get("user");
+  pickupInput.addEventListener("input", checkInputs);
+  destinationInput.addEventListener("input", checkInputs);
 
-  fetch("https://krunaln8n.work.gd/webhook/a592e680-bcf6-4d41-9fa3-75bcee559abd", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      user,
-      address: selectedPlace.formatted_address,
-      lat: selectedPlace.geometry.location.lat(),
-      lng: selectedPlace.geometry.location.lng()
-    })
+  submitBtn.addEventListener("click", async () => {
+    const pickup = pickupInput.value.trim();
+    const destination = destinationInput.value.trim();
+
+    try {
+      await fetch("/api/webhook", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          pickup,
+          destination
+        })
+      });
+
+      // Redirect to WhatsApp after submission
+      window.location.href = "https://wa.me/447888873795";
+
+    } catch (error) {
+      alert("Something went wrong. Please try again.");
+      console.error(error);
+    }
   });
-
-  alert("Location sent successfully!");
-}
 </script>
 
 </body>
