@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      "https://krunaln8n.work.gd/webhook/a592e680-bcf6-4d41-9fa3-75bcee559abd",
+      "https://krunaln8n.work.gd/webhook/webhook-test",
       {
         method: "POST",
         headers: {
