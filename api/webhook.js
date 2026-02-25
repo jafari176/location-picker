@@ -15,15 +15,15 @@ export default async function handler(req, res) {
       }
     );
 
-    const data = await response.text();
+    const text = await response.text();
 
     res.status(200).json({
       success: true,
-      webhookResponse: data,
+      webhookResponse: text,
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Webhook error:", err);
     res.status(500).json({
       error: "Webhook call failed",
     });
