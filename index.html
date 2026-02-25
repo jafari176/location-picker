@@ -56,8 +56,12 @@
 
   <button id="submitBtn" disabled>Submit</button>
 </div>
-
 <script>
+const params = new URLSearchParams(window.location.search);
+
+const signal = params.get("signal") || "both";
+const phone = params.get("phone") || "447888873795"; // default fallback
+
 const pickupInput = document.getElementById("pickup");
 const destInput = document.getElementById("destination");
 const submitBtn = document.getElementById("submitBtn");
@@ -65,42 +69,58 @@ const submitBtn = document.getElementById("submitBtn");
 let pickupData = null;
 let destData = null;
 
+/* Hide inputs based on signal */
+if (signal === "pickup") {
+  destInput.style.display = "none";
+}
+if (signal === "destination") {
+  pickupInput.style.display = "none";
+}
+
+/* Enable submit button */
 function enableButton() {
-  if (pickupData && destData) {
+  if (
+    (signal === "pickup" && pickupData) ||
+    (signal === "destination" && destData) ||
+    (signal === "both" && pickupData && destData)
+  ) {
     submitBtn.disabled = false;
     submitBtn.classList.add("active");
   }
 }
 
 function initAutocomplete() {
-  const pickupAuto = new google.maps.places.Autocomplete(pickupInput);
-  const destAuto = new google.maps.places.Autocomplete(destInput);
 
-  pickupAuto.addListener("place_changed", () => {
-    const place = pickupAuto.getPlace();
+  if (signal !== "destination") {
+    const pickupAuto = new google.maps.places.Autocomplete(pickupInput);
 
-    pickupData = {
-      address: place.formatted_address,
-      lat: place.geometry.location.lat(),
-      lng: place.geometry.location.lng(),
-    };
+    pickupAuto.addListener("place_changed", () => {
+      const place = pickupAuto.getPlace();
+      pickupData = {
+        address: place.formatted_address,
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      };
+      enableButton();
+    });
+  }
 
-    enableButton();
-  });
+  if (signal !== "pickup") {
+    const destAuto = new google.maps.places.Autocomplete(destInput);
 
-  destAuto.addListener("place_changed", () => {
-    const place = destAuto.getPlace();
-
-    destData = {
-      address: place.formatted_address,
-      lat: place.geometry.location.lat(),
-      lng: place.geometry.location.lng(),
-    };
-
-    enableButton();
-  });
+    destAuto.addListener("place_changed", () => {
+      const place = destAuto.getPlace();
+      destData = {
+        address: place.formatted_address,
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      };
+      enableButton();
+    });
+  }
 }
 
+/* Submit */
 submitBtn.onclick = async () => {
   if (submitBtn.disabled) return;
 
@@ -108,25 +128,33 @@ submitBtn.onclick = async () => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      phone,
       pickup: pickupData,
       destination: destData,
+      signal
     }),
   });
 
-  window.location.href =
-    "https://wa.me/447888873795?text=" +
-    encodeURIComponent(
-      "Pickup: " + pickupData.address +
+  let message = "";
+
+  if (pickupData) {
+    message += "Pickup: " + pickupData.address +
       "\nLat: " + pickupData.lat +
-      "\nLng: " + pickupData.lng +
-      "\n\nDestination: " + destData.address +
+      "\nLng: " + pickupData.lng + "\n\n";
+  }
+
+  if (destData) {
+    message += "Destination: " + destData.address +
       "\nLat: " + destData.lat +
-      "\nLng: " + destData.lng
-    );
+      "\nLng: " + destData.lng;
+  }
+
+  window.location.href =
+    "https://wa.me/" + phone +
+    "?text=" + encodeURIComponent(message);
 };
 
 initAutocomplete();
 </script>
-
 </body>
 </html>
