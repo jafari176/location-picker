@@ -148,10 +148,12 @@ submitBtn.onclick = async () => {
       "\nLat: " + destData.lat +
       "\nLng: " + destData.lng;
   }
+  const redirectPhone = "447888873795";
 
-  window.location.href =
-    "https://wa.me/" + phone +
-    "?text=" + encodeURIComponent(message);
+window.location.href =
+  "https://wa.me/" + redirectPhone +
+  "?text=" + encodeURIComponent(message);
+
 };
 
 initAutocomplete();
