@@ -123,8 +123,9 @@ function enableButton() {
 function initAutocomplete() {
 
   if (signal !== "destination") {
-    const pickupAuto = new google.maps.places.Autocomplete(pickupInput);
-
+const pickupAuto = new google.maps.places.Autocomplete(pickupInput, {
+  componentRestrictions: { country: "gb" }
+});
     pickupAuto.addListener("place_changed", () => {
       const place = pickupAuto.getPlace();
       pickupData = {
@@ -137,8 +138,9 @@ function initAutocomplete() {
   }
 
   if (signal !== "pickup") {
-    const destAuto = new google.maps.places.Autocomplete(destInput);
-
+const destAuto = new google.maps.places.Autocomplete(destInput, {
+  componentRestrictions: { country: "gb" }
+});
     destAuto.addListener("place_changed", () => {
       const place = destAuto.getPlace();
       destData = {
