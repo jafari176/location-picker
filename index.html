@@ -1,12 +1,11 @@
-
-  <!-- Google Places API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR8rpCKMMokB67OSQEfdB1vOyxg2h5OzE&libraries=places"></script>
+<!DOCTYPE html>
+<html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Ride</title>
+
   <style>
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
   body {
     font-family: Arial, sans-serif;
@@ -59,24 +58,14 @@
     cursor: pointer;
   }
 
-  /* Extra small mobile tweaks */
   @media (max-width: 480px) {
-    .container {
-      padding: 20px 15px;
-    }
-
-    h2 {
-      font-size: 18px;
-    }
-
-    input,
-    button {
-      font-size: 15px;
-      padding: 12px;
-    }
+    .container { padding: 20px 15px; }
+    h2 { font-size: 18px; }
+    input, button { font-size: 15px; padding: 12px; }
   }
 </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -87,11 +76,11 @@
 
   <button id="submitBtn" disabled>Submit</button>
 </div>
+
 <script>
 const params = new URLSearchParams(window.location.search);
-
 const signal = params.get("signal") || "both";
-const phone = params.get("phone") || "447888873795"; // default fallback
+const phone = params.get("phone") || "447888873795";
 
 const pickupInput = document.getElementById("pickup");
 const destInput = document.getElementById("destination");
@@ -100,15 +89,9 @@ const submitBtn = document.getElementById("submitBtn");
 let pickupData = null;
 let destData = null;
 
-/* Hide inputs based on signal */
-if (signal === "pickup") {
-  destInput.style.display = "none";
-}
-if (signal === "destination") {
-  pickupInput.style.display = "none";
-}
+if (signal === "pickup") destInput.style.display = "none";
+if (signal === "destination") pickupInput.style.display = "none";
 
-/* Enable submit button */
 function enableButton() {
   if (
     (signal === "pickup" && pickupData) ||
@@ -123,9 +106,10 @@ function enableButton() {
 function initAutocomplete() {
 
   if (signal !== "destination") {
-const pickupAuto = new google.maps.places.Autocomplete(pickupInput, {
-  componentRestrictions: { country: "gb" }
-});
+    const pickupAuto = new google.maps.places.Autocomplete(pickupInput, {
+      componentRestrictions: { country: "gb" }
+    });
+
     pickupAuto.addListener("place_changed", () => {
       const place = pickupAuto.getPlace();
       pickupData = {
@@ -138,9 +122,10 @@ const pickupAuto = new google.maps.places.Autocomplete(pickupInput, {
   }
 
   if (signal !== "pickup") {
-const destAuto = new google.maps.places.Autocomplete(destInput, {
-  componentRestrictions: { country: "gb" }
-});
+    const destAuto = new google.maps.places.Autocomplete(destInput, {
+      componentRestrictions: { country: "gb" }
+    });
+
     destAuto.addListener("place_changed", () => {
       const place = destAuto.getPlace();
       destData = {
@@ -152,6 +137,25 @@ const destAuto = new google.maps.places.Autocomplete(destInput, {
     });
   }
 }
+
+/* 🔥 Load Google Maps from backend */
+async function loadGoogleMaps() {
+  const res = await fetch("/api/maps-key");
+  const data = await res.json();
+
+  const script = document.createElement("script");
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${data.key}&libraries=places`;
+  script.async = true;
+  script.defer = true;
+
+  script.onload = () => {
+    initAutocomplete();
+  };
+
+  document.head.appendChild(script);
+}
+
+loadGoogleMaps();
 
 /* Submit */
 submitBtn.onclick = async () => {
@@ -168,26 +172,9 @@ submitBtn.onclick = async () => {
     }),
   });
 
-  let message = "";
-
-  if (pickupData) {
-    message += "Pickup: " + pickupData.address +
-      "\nLat: " + pickupData.lat +
-      "\nLng: " + pickupData.lng + "\n\n";
-  }
-
-  if (destData) {
-    message += "Destination: " + destData.address +
-      "\nLat: " + destData.lat +
-      "\nLng: " + destData.lng;
-  }
-
-
-window.location.href = "https://wa.me/447888873795";
-
+  window.location.href = "https://wa.me/447888873795";
 };
-
-initAutocomplete();
 </script>
+
 </body>
 </html>
