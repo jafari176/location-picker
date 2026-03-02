@@ -1,6 +1,25 @@
+index.html:
 
   <!-- Google Places API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR8rpCKMMokB67OSQEfdB1vOyxg2h5OzE&libraries=places"></script>
+ <script>
+async function loadGoogleMaps() {
+  const res = await fetch("/api/webhook");
+  const data = await res.json();
+
+  const script = document.createElement("script");
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${data.googleMapsApiKey}&libraries=places`;
+  script.async = true;
+  script.defer = true;
+
+  script.onload = () => {
+    initAutocomplete();
+  };
+
+  document.head.appendChild(script);
+}
+
+loadGoogleMaps();
+</script>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
