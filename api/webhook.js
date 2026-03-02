@@ -1,3 +1,10 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+app.get("/api/maps-key", (req, res) => {
+  res.json({ key: process.env.GOOGLE_MAPS_API_KEY });
+});
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Only POST allowed" });
@@ -5,7 +12,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      "https://aylestone-n8n.work.gd/webhook/webhook-aylestone",
+      "https://krunaln8n.work.gd/webhook/webhook-test",
       {
         method: "POST",
         headers: {
