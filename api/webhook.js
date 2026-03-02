@@ -1,16 +1,13 @@
 export default async function handler(req, res) {
 
-  
-  console.log("ENV:", process.env.GOOGLE_MAPS_API_KEY);
-  // GET → return API key
+  // ✅ GET → return Google Maps key
   if (req.method === "GET") {
     return res.status(200).json({
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || null
     });
   }
 
-
-  // POST → forward webhook
+  // ✅ POST → forward webhook
   if (req.method === "POST") {
     try {
       const response = await fetch(
