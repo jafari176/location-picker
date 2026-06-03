@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
       const response = await fetch(
-        "https://automation.aylestonetaxis.co.uk/webhook/webhook-aylestone",
+        "https://automation.aylestone-taxis.co.uk/webhook/webhook-aylestone",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
